@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="script">
+  	<resultMap id="ScriptMap" type="com.spring.script.vo.ScriptVo">
+		<result property="scriptNo" column="scriptNo" javaType="string" />
+		<result property="side" column="side" javaType="string" />
+		<result property="side_num" column="side_num" javaType="string" />
+		<result property="log" column="log" javaType="string" />
+	</resultMap>
+   
+   	<insert id="ScriptInsert" parameterType="hashmap">
+     	insert into script_tbl(scriptNo, side, side_num, log)
+		values(#{scriptNo},#{side},#{side_num},#{log})
+	</insert>
+	
+	<update id="ScriptUpdate" parameterType="hashmap">
+     	UPDATE script_tbl SET side = #{side},side_num = #{side_num},log = #{log}
+			WHERE scriptNo =#{scriptNo} AND side_num=#{side_num}
+			
+	</update>
+   	<select id="ScriptSelect" parameterType="String" resultType="com.spring.script.vo.ScriptVo">
+        SELECT scriptNo, side, side_num, log
+        FROM script_tbl
+      	WHERE scriptNo = #{scriptNo} AND side_num=#{side_num}
+     </select>
+     
+</mapper>        
+

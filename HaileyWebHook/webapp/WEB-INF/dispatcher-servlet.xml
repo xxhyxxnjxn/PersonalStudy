@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd">
+
+    <mvc:annotation-driven />
+	<context:component-scan base-package="com.*"></context:component-scan>
+	
+	<!-- css.js.img 사용 설정 -->
+	<mvc:resources location="/WEB-INF/resources/css/" mapping="/css/**" />
+    <mvc:resources location="/WEB-INF/resources/js/" mapping="/js/**" />
+    <mvc:resources location="/WEB-INF/resources/images/" mapping="/images/**" />
+    <mvc:resources location="/WEB-INF/resources/icons/" mapping="/icons/**" />
+    <mvc:resources location="/WEB-INF/resources/plugins/" mapping="/plugins/**" />
+    <mvc:resources location="/WEB-INF/resources/amcharts/" mapping="/amcharts/**" />
+    
+	
+	
+	<bean id="viewResolver" 
+	class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	  <property name="prefix" value="/WEB-INF/views/" />
+	  <property name="suffix" value=".jsp" />
+	  <property name="contentType" value="text/html; charset=UTF-8"/>	  
+	</bean>
+
+    <!-- db 연결  -->
+  <!--  
+
+ <bean id="dataSource" 
+       class="org.apache.commons.dbcp.BasicDataSource" 
+       destroy-method="close">
+      <property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+      <property name="url"      value="jdbc:oracle:thin:@localhost:1521:xe" />
+      <property name="username" value="zprj" />
+      <property name="password" value="1234" />    
+    </bean>
+  
+  -->
+  
+  	<bean class="org.apache.ibatis.datasource.pooled.PooledDataSource" id="dataSource">
+		<property value="com.mysql.jdbc.Driver" name="driver"/>
+		<property value="jdbc:mysql://localhost:3306/gmcdb" name="url"/>
+		<property value="gmcdb" name="username"/>
+		<property value="1234" name="password"/>
+	</bean>
+  
+    <!-- 
+       Mybatis 와 스프링을 연동하기 위한 SqlSessionFactory  
+       == db 연결 및 SQL 실행하는 객체 
+    -->
+    <bean  id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+       <!--  DataSource Dependency Injection -->
+       <property name="dataSource" ref="dataSource" />
+       <!-- XML Mapper 인식하게 설정 -->
+       <property name="mapperLocations" value="classpath:myBatis/sqlmaps/*.xml" /> 
+       <property name="configLocation" value="classpath:model/modelConfig.xml" />
+    
+    
+    </bean>
+
+
+
+
+    <!-- SQLSessionTemplate설정하기 DAO인터페이스를 만들었기때문에 
+       Mybatis에서 DAO인터페이스를 구현하기위해서 필요한작업 -->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate"
+        destroy-method="clearCache">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />    
+    </bean>
+
+    <!-- MultipartResolver 설정 :업로드파일사이즈 지정(100M) -->
+     <bean id="multipartResolver" 
+     class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="100000000" />
+        <property name="maxInMemorySize" value="100000000" />
+    </bean>
+    
+
+   <!--   Intercepter 설정 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/resources/**" />
+			<mvc:exclude-mapping path="/css/**" />
+			<mvc:exclude-mapping path="/images/**" />
+			<mvc:exclude-mapping path="/js/**" />
+			<mvc:exclude-mapping path="/plugins/**" />
+			<mvc:exclude-mapping path="/icons/**" />
+			
+			<bean id="authInterceptor"
+				class="com.spring.interceptor.AuthInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors> 
+
+</beans>
