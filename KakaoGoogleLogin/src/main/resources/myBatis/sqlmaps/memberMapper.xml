@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Mem">
+  	
+  	<resultMap id="ApiMap" type="com.spring.member.vo.ApiVo">
+  		<result property="num" column="num" javaType="int" />
+		<result property="m_id" column="m_id" javaType="string" />
+		<result property="site_name" column="site_name" javaType="string" />
+		<result property="connectKey" column="connectKey" javaType="string" />
+		<result property="secretKey" column="secretKey" javaType="string" />
+	</resultMap>
+  	
+  	
+  	<select id="Login" parameterType="hashmap" resultType="com.spring.member.vo.MemberVo">
+        
+		         
+        SELECT *
+        	FROM MEM_TBL
+      		WHERE M_ID = #{m_id} 
+      		AND pass = #{m_pw}
+      	
+      
+    </select>
+   
+   	<insert id="ApiInsert" parameterType="hashmap">
+     	insert into api_tbl(m_id, site_name, connectKey, secretKey)
+		values(#{m_id},#{site_name},#{connectKey},#{secretKey})
+	</insert>
+   	
+   	<select id="ApiShow" parameterType="hashmap" resultType="com.spring.member.vo.ApiVo">
+   		SELECT m_id, site_name, connectKey, secretKey
+   		from api_tbl
+   		where m_id = #{m_id}
+   		
+   	</select>
+   
+	 <!-- <insert id="MemInsert"
+     		 statementType="CALLABLE"
+     		 parameterType="hashmap" > -->
+     <insert id="MemInsert" parameterType="hashmap">		 
+    	<!-- {
+    		CALL PKG_MEM.PROC_MEM_INSERT
+    		(
+    			#{ m_id, mode = IN, jdbcType = VARCHAR },
+    			#{ m_name, mode = IN, jdbcType = VARCHAR },
+    			#{ m_pw, mode = IN, jdbcType = VARCHAR },
+    			#{ tel, mode = IN, jdbcType = VARCHAR },
+    			#{ email, mode = IN, jdbcType = VARCHAR },
+    			#{ lvl, mode = IN, jdbcType = VARCHAR }
+    		)    		
+    	}		  -->
+    	insert into mem_tbl(m_id, pass, email) 
+    	values (#{m_id},#{m_pw}, #{email})
+	 </insert>
+	 
+	 <select id="MemSelect_Kakao" parameterType="hashmap" resultType="com.spring.member.vo.MemberVo">		 
+    	SELECT *
+        	FROM MEM_TBL
+      		WHERE kakao_id = #{kakao_id} 
+	 </select>
+	 
+	 <insert id="MemInsert_Kakao" parameterType="hashmap">		 
+
+    	insert into mem_tbl(m_id, name, pass,email,kakao_id) 
+    	values (#{m_id}, #{name}, #{m_pw}, #{email}, #{kakao_id})
+	 </insert>
+	 
+	 <select id="FindId" parameterType="hashmap" resultType="com.spring.member.vo.MemberVo">
+        SELECT M_ID
+        	FROM MEM_TBL
+      		WHERE M_NAME = #{m_name} 
+      		AND TEL = #{tel}
+      		AND EMAIL = #{email}
+     </select>
+   
+   	 <select id="FindPw" parameterType="hashmap" resultType="com.spring.member.vo.MemberVo">
+        SELECT M_ID, M_NAME ,M_PW, TEL, EMAIL
+        	FROM MEM
+      		WHERE M_ID = #{m_id} 
+      		AND M_NAME = #{m_name} 
+      		AND TEL = #{tel}
+      		AND EMAIL = #{email}
+     </select>
+   	
+   	
+   	 <update id="ChangePw" parameterType="hashmap">
+   	 	
+   	 	UPDATE MEM SET M_PW = #{m_pw} 
+			WHERE M_ID =#{m_id} 
+			AND M_NAME = #{m_name} 
+			AND TEL = #{tel} 
+			AND EMAIL = #{email} 
+			
+   	 
+   	 </update>
+   	
+   <!-- 	<select id="CheckId" statementType="CALLABLE" parameterType="hashmap" resultType="com.spring.member.vo.MemberVo"> -->
+      <select id="CheckId" statementType="CALLABLE" parameterType="hashmap" resultType="String">
+      <!-- {CALL PKG_MEM.PROC_IDCHECK (
+      #{m_id,mode=IN, jdbcType=VARCHAR},
+      #{result, mode=OUT, jdbcType=CURSOR, resultMap = MemMap}
+      )} -->
+      SELECT COUNT(*) FROM MEM_TBL
+      WHERE M_ID = #{m_id}
+     </select>
+	 
+	 
+	 <update id="updateAPI" parameterType="hashmap">
+   	 	
+   	 	UPDATE API_TBL SET connectKey = #{update_connectKey}, secretKey = #{update_secretKey}
+			WHERE connectKey =#{hidden_connectKey} 
+			AND secretKey =#{hidden_secretKey}
+			AND  M_ID =#{m_id}
+
+   	 </update>
+   	 
+   	 <delete id="deleteAPI" parameterType="hashmap">
+   	 	
+   	 	DELETE FROM API_TBL
+			WHERE connectKey =#{connectKey} 
+			AND secretKey =#{secretKey}
+
+   	 </delete>
+   	 
+      <select id="CheckConnect" statementType="CALLABLE" parameterType="hashmap" resultType="String">
+      
+      SELECT COUNT(*) FROM API_TBL
+      WHERE connectKey =#{connectKey}
+     </select>	
+     
+     <select id="CheckSecret" statementType="CALLABLE" parameterType="hashmap" resultType="String">
+      
+      SELECT COUNT(*) FROM API_TBL
+      WHERE secretKey =#{secretKey}
+     </select>	
+     
+      <select id="CheckSite" statementType="CALLABLE" parameterType="hashmap" resultType="String">
+      
+      SELECT COUNT(*) FROM API_TBL
+      WHERE site_name =#{site_name}
+      AND  M_ID =#{m_id}
+     </select>	
+     
+</mapper>        
+

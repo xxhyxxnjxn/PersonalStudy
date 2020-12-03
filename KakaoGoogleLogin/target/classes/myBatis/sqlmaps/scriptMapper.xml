@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="script">
+	<resultMap id="ScriptMap"
+		type="com.spring.script.vo.ScriptVo">
+		<result property="scriptNo" column="scriptNo" javaType="string" />
+		<result property="side" column="side" javaType="string" />
+		<result property="side_num" column="side_num" javaType="string" />
+		<result property="log" column="log" javaType="string" />
+	</resultMap>
+
+	<insert id="ScriptInsert" parameterType="ScriptVo">
+		insert into
+		script_tbl(scriptNo, side, side_num, log)
+		values(#{scriptNo},'Exit',#{side_num},'Hi')
+	</insert>
+
+	<update id="Script_Update_buy" parameterType="hashmap">
+		UPDATE script_tbl
+		SET side = #{side},side_num = #{side_num},log = #{log}
+		WHERE scriptNo = #{scriptNo}
+
+	</update>
+
+	<update id="Script_Update_sell" parameterType="hashmap">
+		UPDATE script_tbl
+		SET side = #{side}
+		WHERE scriptNo =#{scriptNo} AND side_num=#{side_num}
+
+	</update>
+	
+	<update id="SysBotCk_Update_buy" parameterType="hashmap">
+		UPDATE
+		sys_bot_ck_tbl SET position = #{position}, side_num = #{side_num}
+		WHERE scriptNo =#{scriptNo}
+		AND bot_name=#{bot_name}
+	</update>
+	<update id="SysBotCk_Update_sell" parameterType="hashmap">
+		UPDATE
+		sys_bot_ck_tbl SET position = #{position}
+		WHERE scriptNo =#{scriptNo}
+		AND side_num=#{side_num}
+		AND bot_name=#{bot_name}
+	</update>
+
+	<select id="ScriptSelect" parameterType="String"
+		resultType="com.spring.script.vo.ScriptVo">
+		SELECT scriptNo, side, side_num, log
+		FROM script_tbl
+		WHERE
+		scriptNo = #{scriptNo}
+	</select>
+
+	<select id="SysBotCk_Bithumb_Select" parameterType="String"
+		resultType="com.spring.script.vo.SysBotCkVo">
+		SELECT m_id, site,
+		currency,bot_ck,scriptNo,position,side_num,set_per,bot_name
+		FROM
+		sys_bot_ck_tbl
+		WHERE scriptNo = #{scriptNo} AND position = #{position}
+		AND bot_ck= "1" AND site="bithumb"
+	</select>
+	
+	<select id="SysBotCk_Upbit_Select" parameterType="String"
+		resultType="com.spring.script.vo.SysBotCkVo2">
+		SELECT m_id, site,
+		currency,bot_ck,scriptNo,position,side_num,set_per,bot_name
+		FROM
+		sys_bot_ck_tbl
+		WHERE scriptNo = #{scriptNo} AND position = #{position}
+		AND bot_ck= "1" AND site="upbit"
+	</select>
+	
+	<select id="SysBotCk_Coinone_Select" parameterType="String"
+		resultType="com.spring.script.vo.SysBotCkVo">
+		SELECT m_id, site,
+		currency,bot_ck,scriptNo,position,side_num,set_per,bot_name
+		FROM
+		sys_bot_ck_tbl
+		WHERE scriptNo = #{scriptNo} AND position = #{position}
+		AND side_num =
+		#{side_num} AND bot_ck= "1" AND site="coinone"
+	</select>
+		
+
+	<select id="Api_Select" parameterType="String"
+		resultType="com.spring.script.vo.ApiVo">
+		SELECT site, apiKey, secretKey
+		FROM api_tbl
+		WHERE m_id =
+		#{m_id} AND site = #{site}
+	</select>
+
+	<insert id="OrderListInsert" parameterType="hashmap">
+		insert into
+		sys_orderList_tbl(m_id, order_date, site, currency, price,
+		units,
+		order_id, side, fee, tot_price, revenue, bot_name)
+		values(#{m_id},NOW(),#{site},#{market},#{price},#{volume},#{uuid},#{side},#{paid_fee},#{funds},#{revenue},#{bot_name})
+	</insert>
+
+	<insert id="Bithumb_orderlist_insert" parameterType="hashmap">
+		insert into sys_orderlist_tbl(m_id, order_date, site, currency, price,
+		units, order_id, side, fee,tot_price,revenue,bot_name)
+		values(#{m_id},now(),"bithumb", #{currency}, #{price}, #{units},
+		#{orderId},#{side}, #{fee},#{tot_price},#{revenue},#{bot_name})
+	</insert>
+
+	<select id="Bithumb_orderlist_select" parameterType="hashmap"
+		resultType="com.spring.script.vo.SysOrderlistVo">
+		SELECT * FROM sys_orderlist_tbl
+		WHERE m_id = #{m_id} and site = "bithumb"
+		order by order_date desc limit 1 ;
+	</select>
+		
+	<select id="Upbit_orderlist_select" parameterType="hashmap"
+		resultType="com.spring.script.vo.SysOrderlistVo">
+		SELECT * FROM sys_orderlist_tbl
+		WHERE m_id = #{m_id} and site = "upbit" and currency = #{currency}
+		order by order_date desc limit 1;
+	</select>
+	
+	<select id="getScriptList"  resultType="ScriptVo">
+		SELECT * FROM script_tbl
+	</select>
+	
+	<delete id="ScriptDelete" parameterType="string">
+		DELETE FROM script_tbl WHERE scriptNo = #{scriptNo};
+	</delete>
+	
+	<update id="ScriptUpdate" parameterType="hashmap">
+		UPDATE
+		script_tbl SET scriptNo = #{set_scriptNo},
+		side = #{side},
+		side_num = #{side_num},
+		log = 'update!'
+		WHERE scriptNo =#{scriptNo}
+
+	</update>
+	
+	<select id="ScriptSelectOne" parameterType="hashmap"
+		resultType="com.spring.script.vo.ScriptVo">
+		SELECT *
+		FROM script_tbl
+		WHERE
+		scriptNo = #{scriptNo}
+	</select>
+	
+
+</mapper>        
+

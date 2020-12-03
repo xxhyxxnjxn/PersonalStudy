@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bot">
+
+  	<select id="bot_site_select" resultType="com.spring.bot.vo.BotSiteVo">
+     	select site, site_kor
+     	from site_tbl;
+     </select>
+     
+     <select id="api_tbl_select" resultType="com.spring.script.vo.ApiVo">
+     	SELECT apiKey, secretKey 
+     	FROM api_tbl
+      	WHERE m_id = #{m_id} AND bot_name = #{bot_name}
+     </select>
+     
+     <select id="sys_bot_ck_tbl_select_botname" parameterType="hashmap" resultType="com.spring.script.vo.SysBotCkVo">
+     	SELECT bot_name 
+     	FROM sys_bot_ck_tbl
+      	WHERE m_id = #{m_id} AND site = #{site} AND currency = #{currency}
+     </select>
+     
+     <insert id="api_tbl_insert" parameterType="hashmap">
+     		insert into api_tbl(m_id, site, apiKey, secretKey,bot_name) 
+    			values (#{m_id}, #{site}, #{apiKey}, #{secretKey}, #{bot_name})
+     </insert>
+     
+     
+      <select id="api_tbl_check" parameterType="hashmap" resultType="String">
+      
+      	SELECT COUNT(*) FROM api_tbl
+      	WHERE apiKey = #{apiKey}
+     </select>
+     
+     <select id="sys_bot_ck_tbl_select_units" parameterType="hashmap" resultType="com.spring.script.vo.SysOrderlistVo">
+     	SELECT units
+     	FROM sys_orderlist_tbl
+      	WHERE bot_name = #{bot_name} AND site = #{site} AND currency = #{currency} AND m_id=#{m_id}
+     </select>
+     
+     <insert id="sys_bot_ck_tbl_insert" parameterType="hashmap">
+     		insert into sys_bot_ck_tbl(m_id, site, currency, bot_ck,scriptNo,position,side_num, set_per, bot_name) 
+    			values (#{m_id}, #{site}, #{currency}, "0","210","Exit","1", #{set_per}, #{bot_name})
+     </insert>
+     
+     <select id="sys_bot_ck_tbl_select" parameterType="String" resultType="com.spring.script.vo.SysBotCkVo">
+      
+      	SELECT site, currency, bot_ck, set_per, bot_name, position
+      	FROM sys_bot_ck_tbl
+      	WHERE m_id = #{id}
+     </select>
+     
+     <select id="sys_orderlist_tbl_select" parameterType="hashmap" resultType="com.spring.script.vo.SysOrderlistVo">
+      
+      	SELECT m_id,order_date, site, currency, price,units, side, tot_price, fee,revenue,bot_name
+      	FROM sys_orderlist_tbl
+      	WHERE m_id = #{m_id} AND site = #{site} AND currency = #{currency}
+     </select>
+     
+     <update id="api_tbl_update" parameterType="hashmap">
+     	UPDATE api_tbl SET apiKey = #{apiKey},secretKey = #{secretKey},bot_name=#{bot_name}
+			WHERE m_id =#{m_id} AND site=#{site}
+			
+	</update>
+	
+	 <update id="sys_bot_ck_tbl_update" parameterType="hashmap">
+     	UPDATE sys_bot_ck_tbl SET currency = #{currency},set_per = #{set_per},bot_name=#{bot_name}
+			WHERE m_id =#{m_id} AND site=#{site}
+			
+	</update>
+	
+	<update id="sys_bot_ck_tbl_state_update" parameterType="hashmap">
+     	UPDATE sys_bot_ck_tbl SET bot_ck = #{bot_ck}
+			WHERE m_id =#{m_id} AND site=#{site} AND currency=#{currency} AND bot_name = #{bot_name}
+			
+	</update>
+	
+	<delete id="api_tbl_delete" parameterType="hashmap">
+   	 	
+   	 	DELETE FROM api_tbl
+			WHERE m_id =#{m_id}
+			AND site=#{site}
+			AND bot_name = #{bot_name}
+
+   	 </delete>
+   	 
+   	 <delete id="sys_bot_ck_tbl_delete" parameterType="hashmap">
+   	 	
+   	 	DELETE FROM sys_bot_ck_tbl
+			WHERE currency =#{currency} 
+			AND m_id =#{m_id}
+			AND site=#{site}
+			AND bot_name = #{bot_name}
+			
+   	 </delete>
+   	 
+   	 <delete id="sys_orderlist_tbl_delete" parameterType="hashmap">
+   	 	
+   	 	DELETE FROM sys_orderlist_tbl
+			WHERE currency =#{currency} 
+			AND m_id =#{m_id}
+			AND site=#{site}
+			AND bot_name = #{bot_name}
+			
+   	 </delete>
+     
+</mapper>        
+

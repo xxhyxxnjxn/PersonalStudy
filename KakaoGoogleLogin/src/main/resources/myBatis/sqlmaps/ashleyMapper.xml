@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="system">
+	 <resultMap id="BotSignVO" type="com.spring.script.vo.BotSignVO">
+	  		<result property="m_id" column="m_id" javaType="string" />
+			<result property="site" column="site" javaType="string" />
+			<result property="currency" column="currency" javaType="string" />
+			<result property="bot_ck" column="bot_ck" javaType="string" />
+			<result property="scriptNo" column="scriptNo" javaType="string" />
+			<result property="side_num" column="side_num" javaType="string" />
+			<result property="position" column="position" javaType="string" />
+			<result property="bot_name" column="bot_name" javaType="string" />
+			<result property="set_per" column="set_per" javaType="string" />
+	</resultMap>
+	
+		<select id="showBotSign"  parameterType="hashmap" 
+	 	 resultType="com.spring.script.vo.BotSignVO"  resultMap="BotSignVO"> 
+	 	 	SELECT m_id,site,currency,bot_ck,scriptNo,if(position is null,0,position) as position, if(side_num is null,0,side_num) as side_num,bot_name, set_per
+	 	 	  FROM SYS_BOT_CK_TBL WHERE scriptNo = #{scriptNo} and position = "Exit" and bot_ck = "1" and site= "coinone"
+	 	 <!-- 
+			{CALL PROC_BOTCK_WHENINPUT_BUYSIGN(
+		        #{ scriptNo, mode=IN, jdbcType=VARCHAR}
+		     	)}
+	 	  -->
+		 </select>
+		 
+	 	 <select id="showBotSignExit"  parameterType="hashmap" 
+	 	 resultType="com.spring.script.vo.BotSignVO"  resultMap="BotSignVO">
+	 	 	SELECT m_id,site,currency,bot_ck,scriptNo,if(position is null,0,position) as position ,if(side_num is null,0,side_num) as side_num,bot_name,set_per
+	 	 	  FROM SYS_BOT_CK_TBL WHERE scriptNo = #{scriptNo} and position = "Buy" and bot_ck = "1" and site= "coinone"
+		 </select>
+		 
+	     <update id="updateBotSign">
+	    	 UPDATE SYS_BOT_CK_TBL SET position = #{side} , side_num = #{side_num} 
+	    	 WHERE scriptNo = #{scriptNo} and position ="Exit" and m_id = #{bot_mid} and site=#{bot_site} and currency =#{bot_currency} and bot_ck = "1" AND bot_name= #{bot_name}
+		 </update>
+		 
+	     <update id="UpdateBotSignExit">
+	    	 UPDATE SYS_BOT_CK_TBL SET position = #{side} , side_num = #{side_num}
+	    	 WHERE scriptNo = #{scriptNo} and position ="Buy" and m_id = #{bot_mid} and site=#{bot_site} and currency =#{bot_currency} and bot_ck = "1" AND bot_name= #{bot_name}
+		 </update>
+
+	<resultMap id="ApiVo" type="com.spring.script.vo.ApiVo">
+	  		<result property="m_id" column="m_id" javaType="string" />
+			<result property="site" column="site" javaType="string" />
+			<result property="apiKey" column="apiKey" javaType="string" />
+			<result property="secretKey" column="secretKey" javaType="string" />
+			<result property="bot_name" column="bot_name" javaType="string" />
+	</resultMap>
+	
+     	 <select id="getMemKey" resultType="com.spring.script.vo.ApiVo"  resultMap="ApiVo">
+		 	SELECT m_id,site,apiKey,secretKey, bot_name FROM API_TBL where m_id=#{bot_mid} and site=#{bot_site} and bot_name = #{bot_name}
+		 </select>
+			
+		<insert id="insertOrderlist" parameterType="hashmap">
+			INSERT INTO SYS_ORDERLIST_TBL(m_id, site, currency, price,units,order_id,order_date,side,fee,revenue,bot_name,tot_price)
+			VALUES(#{m_id}, #{site}, #{currency}, #{price},#{units},#{order_id},now(),#{side},#{fee},#{revenue},#{bot_name},#{tot_price})
+		</insert>
+
+	<resultMap id="SysOrderlistVo" type="com.spring.script.vo.SysOrderlistVo">
+			<result property="m_id" column="m_id" javaType="string" />
+			<result property="order_date" column="order_date" javaType="string" />
+			<result property="site" column="site" javaType="string" />
+			<result property="currency" column="currency" javaType="string" />
+			<result property="price" column="price" javaType="string" />
+			<result property="units" column="units" javaType="string" />
+			<result property="order_id" column="order_id" javaType="string" />
+			<result property="side" column="side" javaType="string" />
+			<result property="tot_price" column="tot_price" javaType="string" />
+			<result property="fee" column="fee" javaType="string" />
+			<result property="revenue" column="revenue" javaType="string" />
+			<result property="bot_name" column="bot_name" javaType="string" />
+	 </resultMap>
+		 
+     	 <select id="showBalanceCoin" parameterType="hashmap" resultType="com.spring.script.vo.SysOrderlistVo"  resultMap="SysOrderlistVo">
+		 	SELECT M_ID, ORDER_DATE, SITE, CURRENCY,PRICE,UNITS,ORDER_ID,SIDE,FEE,TOT_PRICE, REVENUE,BOT_NAME
+		 	FROM SYS_ORDERLIST_TBL
+			WHERE NUM = (
+				SELECT MAX(NUM) FROM SYS_ORDERLIST_TBL
+				WHERE SIDE=#{side} AND M_ID=#{m_id} AND SITE=#{site} AND CURRENCY=#{currency} and BOT_NAME=#{bot_name}
+				ORDER BY 1 DESC
+			    )
+		 </select>
+
+
+
+</mapper>
