@@ -20,7 +20,13 @@ import gmc.rd.report.api.upbit.vo.UpbitAccountVo;
 import gmc.rd.report.dto.ApiDto;
 import gmc.rd.report.dto.ApiDtoMapper;
 import gmc.rd.report.entity.Api;
+import gmc.rd.report.entity.ApiRoadingState;
+import gmc.rd.report.entity.BankStateMentState;
+import gmc.rd.report.entity.CandleStickState;
 import gmc.rd.report.repository.ApiRepository;
+import gmc.rd.report.repository.ApiRoadingStateRepository;
+import gmc.rd.report.repository.BankStateMentStateRepository;
+import gmc.rd.report.repository.CandleStickStateRepository;
 @Service
 public class ShowServiceImpl implements ShowService{
 	
@@ -37,13 +43,19 @@ public class ShowServiceImpl implements ShowService{
 	@Autowired
 	CoinoneApiService coinoneApiService;
 
+	@Autowired
+	private ApiRoadingStateRepository apiRoadingRepository;
+	@Autowired
+	private BankStateMentStateRepository bankStateMentStateRepository;
+	@Autowired
+	private CandleStickStateRepository candleStickStateRepository;
 	
 	@Override
 	public List<ApiDto> getApis(String memId) {
 		List<Api> api = apiRepository.findBymemId(memId);
-		System.out.println("이건 api"+api);
+		//System.out.println("이건 api"+api);
 		List<ApiDto> apiDto = ApiDtoMapper.INSTANCE.ToDtoList(api);
-		System.out.println("이건 Dto"+apiDto);
+		//System.out.println("이건 Dto"+apiDto);
 		return apiDto;
 	}
 
@@ -55,7 +67,7 @@ public class ShowServiceImpl implements ShowService{
 		hash.put("secretKey", apiDto.getSecretKey());
 		hash.put("currency", "BTC");
 		bithumbApiService.getBalance(hash);
-		System.out.println("빗썸 밸런스 가져오기" + bithumbApiService.getBalance(hash));
+		//System.out.println("빗썸 밸런스 가져오기" + bithumbApiService.getBalance(hash));
 
 		BithumbBalanceKrwVo bithumbBalanceKrwVo = null;
 		Gson gson = new Gson();
@@ -94,19 +106,29 @@ public class ShowServiceImpl implements ShowService{
 		try {
 			hashMap.put("apiKey", apidto.getApiKey());
 			hashMap.put("secretKey", apidto.getSecretKey());
-			coinoneApiService.getBalance(hashMap);
-			System.out.println(coinoneApiService.getBalance(hashMap));
+			//System.out.println(coinoneApiService.getBalance(hashMap));
 
 			CoinoneBalanceKrwVo coinconBalanceKrwVo = null;
 			Gson gson = new Gson();
-			CoinoneBalanceVo coinoneBalanceVo = gson.fromJson(coinoneApiService.getBalance(hashMap),
-					CoinoneBalanceVo.class);
-			coinconBalanceKrwVo = coinoneBalanceVo.getKrw();
-			return coinconBalanceKrwVo;
+			
+			ApiRoadingState apiRoadingState = apiRoadingRepository.findByMemIdAndSite(apidto.getMemId(), apidto.getSite());
+			BankStateMentState bankStateMentState = bankStateMentStateRepository.findByMemIdAndSite(apidto.getMemId(), apidto.getSite());
+			CandleStickState candleStickState = candleStickStateRepository.findByMemIdAndSite(apidto.getMemId(), apidto.getSite());
+
+			if(apiRoadingState.getState().equals("1") && bankStateMentState.getState().equals("1")&&candleStickState.getState().equals("1")) {
+				coinoneApiService.getBalance(hashMap);
+				CoinoneBalanceVo coinoneBalanceVo = gson.fromJson(coinoneApiService.getBalance(hashMap),
+						CoinoneBalanceVo.class);
+				coinconBalanceKrwVo = coinoneBalanceVo.getKrw();
+				return coinconBalanceKrwVo;
+			}else {
+				return null;
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 }

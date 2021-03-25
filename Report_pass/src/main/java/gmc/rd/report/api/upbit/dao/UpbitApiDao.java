@@ -53,6 +53,27 @@ public class UpbitApiDao {
 		}
 		return result;
 	}
+	/**
+	 * marketAll, 조회를 위한 메소드
+	 * @param hashMap 
+	 * @param url
+	 * @return
+	 */
+	public String publicHttp2(String url) {
+		try {
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet request = new HttpGet(serverUrl + url);
+			request.setHeader("Content-Type", "application/json");
+
+			HttpResponse response = client.execute(request);
+			HttpEntity entity = response.getEntity();
+
+			result = EntityUtils.toString(entity, "UTF-8");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 	
 	/**
 	 * balance, orderdetail 조회를 위한 메소드
@@ -170,8 +191,8 @@ public class UpbitApiDao {
 			queryElements.add(entity.getKey() + "=" + entity.getValue());
 		}
 
-		for (String uuid : uuids) {
-			queryElements.add("uuids[]=" + uuid);
+		for (String states : uuids) {
+			queryElements.add("states[]=" + states);
 		}
 
 		String queryString = String.join("&", queryElements.toArray(new String[0]));
@@ -238,6 +259,84 @@ public class UpbitApiDao {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return result;
+	}
+	
+	public String withdrawHttp(HashMap<String, String> hashMap,HashMap<String, String> params) throws Exception {
+		ArrayList<String> queryElements = new ArrayList<>();
+        for(Map.Entry<String, String> entity : params.entrySet()) {
+            queryElements.add(entity.getKey() + "=" + entity.getValue());
+        }
+
+        String queryString = String.join("&", queryElements.toArray(new String[0]));
+
+        MessageDigest md = MessageDigest.getInstance("SHA-512");
+        md.update(queryString.getBytes("UTF-8"));
+
+        String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
+
+        Algorithm algorithm = Algorithm.HMAC256(hashMap.get("secretKey"));
+        String jwtToken = JWT.create()
+                .withClaim("access_key", hashMap.get("apiKey"))
+                .withClaim("nonce", UUID.randomUUID().toString())
+                .withClaim("query_hash", queryHash)
+                .withClaim("query_hash_alg", "SHA512")
+                .sign(algorithm);
+
+        String authenticationToken = "Bearer " + jwtToken;
+
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet request = new HttpGet(serverUrl + "/v1/withdraws?" + queryString);
+            request.setHeader("Content-Type", "application/json");
+            request.addHeader("Authorization", authenticationToken);
+
+            HttpResponse response = client.execute(request);
+            HttpEntity entity = response.getEntity();
+
+            result = EntityUtils.toString(entity, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		return result;
+	}
+	
+	public String depositHttp(HashMap<String, String> hashMap,HashMap<String, String> params) throws Exception {
+		ArrayList<String> queryElements = new ArrayList<>();
+        for(Map.Entry<String, String> entity : params.entrySet()) {
+            queryElements.add(entity.getKey() + "=" + entity.getValue());
+        }
+
+        String queryString = String.join("&", queryElements.toArray(new String[0]));
+
+        MessageDigest md = MessageDigest.getInstance("SHA-512");
+        md.update(queryString.getBytes("UTF-8"));
+
+        String queryHash = String.format("%0128x", new BigInteger(1, md.digest()));
+
+        Algorithm algorithm = Algorithm.HMAC256(hashMap.get("secretKey"));
+        String jwtToken = JWT.create()
+                .withClaim("access_key", hashMap.get("apiKey"))
+                .withClaim("nonce", UUID.randomUUID().toString())
+                .withClaim("query_hash", queryHash)
+                .withClaim("query_hash_alg", "SHA512")
+                .sign(algorithm);
+
+        String authenticationToken = "Bearer " + jwtToken;
+
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet request = new HttpGet(serverUrl + "/v1/deposits?" + queryString);
+            request.setHeader("Content-Type", "application/json");
+            request.addHeader("Authorization", authenticationToken);
+
+            HttpResponse response = client.execute(request);
+            HttpEntity entity = response.getEntity();
+
+            result = EntityUtils.toString(entity, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 		return result;
 	}
 	

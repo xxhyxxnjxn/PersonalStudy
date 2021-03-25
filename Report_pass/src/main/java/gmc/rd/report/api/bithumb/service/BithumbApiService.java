@@ -27,11 +27,13 @@ String getOrderBook(HashMap<String,String> hash);
 	
 	String cancelOrder(HashMap<String,String> hash);
 	
+	String getOrders(String apiKey,String secretKey,String orderCurrency);
+	
 	String getOrderDetail(HashMap<String,String> hash);
 
 	String getOrderList(HashMap<String,String> hash);
 	
-	List<BithumbTransactionVo> getUserTransaction(String apiKey,String secretKey,String orderCurrency);
+	List<BithumbTransactionVo> getUserTransaction(String apiKey,String secretKey,String orderCurrency, String offSet);
 	
 	JsonNode getKakaoAccessToken(String code);
 	
@@ -42,6 +44,8 @@ String getOrderBook(HashMap<String,String> hash);
 	JsonNode getGoogleAccessToken(String code);
 	
 	JsonNode getGoogleUserInfo(String accessToken);
+
+	String getCandleStick(String currency,String candleType);
 	
 	//String getTrades(String coin); // 내 체결내역
 }

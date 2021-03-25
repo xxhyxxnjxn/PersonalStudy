@@ -18,8 +18,5 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 
 	Board findByOrderId(String orderId);
 
-
-
-
 	
 }

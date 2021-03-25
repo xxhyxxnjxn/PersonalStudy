@@ -67,15 +67,15 @@ public class BoardService {
       // 해당 함수로 종료시 service가 종료될 때 트랜젝션이 종료됩니다. 이때 더티체킹 - 자동업데이트가 됩니다.
    }
    @Transactional
-   public void updateLogbi(String orderId, Report requestReport) {
-      Report report  = reportRepository.findByOrderId(orderId); // 영속화완료
+   public void updateLogbi(String orderId, Report requestReport,String memId) {
+      Report report  = reportRepository.findByOrderId(orderId,memId); // 영속화완료
       report.setLog(requestReport.getLog());
       
    }
    //하은 추가
    @Transactional
-   public void updateLog(String orderId, String log) {
-      Report report  = reportRepository.findByOrderId(orderId); // 영속화완료
+   public void updateLog(String orderId, String log,String memId) {
+      Report report  = reportRepository.findByOrderId(orderId,memId); // 영속화완료
       report.setLog(log);
       
    }
@@ -85,14 +85,14 @@ public class BoardService {
       return board;
    }
    @Transactional
-   public void updateLogup(String orderId, Report2 requestReport) {
-      Report2 report  = reportRepository2.findByOrderId(orderId); // 영속화완료
+   public void updateLogup(String orderId, Report2 requestReport,String memId) {
+      Report2 report  = reportRepository2.findByOrderId(orderId,memId); // 영속화완료
       report.setLog(requestReport.getLog());
       
    }
    @Transactional
-   public void updateLogco(String orderId, Report3 requestReport) {
-      Report3 report  = reportRepository3.findByOrderId(orderId); // 영속화완료
+   public void updateLogco(String orderId, Report3 requestReport,String memId) {
+      Report3 report  = reportRepository3.findByOrderId(orderId,memId); // 영속화완료
       report.setLog(requestReport.getLog());
       
    }

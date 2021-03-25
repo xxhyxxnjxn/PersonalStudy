@@ -6,6 +6,7 @@ import java.util.List;
 import org.json.JSONObject;
 
 import gmc.rd.report.api.coinone.vo.CoinoneBalanceVo;
+import gmc.rd.report.api.coinone.vo.CoinoneCoinTransactionsDataVo;
 import gmc.rd.report.api.coinone.vo.CoinoneTransactionVo;
 
 public interface CoinoneApiService {
@@ -41,5 +42,7 @@ public interface CoinoneApiService {
 
 	String MyCompletedOrders(HashMap<String, String> hashMap) throws Exception;
 	List<CoinoneTransactionVo> MyCompletedOrders2(HashMap<String, String> hashMap) throws Exception;
+	
+	List<CoinoneCoinTransactionsDataVo> coinTransacionHistory(HashMap<String, String> hashMap) throws Exception;
 
 }

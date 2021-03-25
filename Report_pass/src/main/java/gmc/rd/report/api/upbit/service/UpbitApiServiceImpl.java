@@ -1,5 +1,6 @@
 package gmc.rd.report.api.upbit.service;
 
+
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +13,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-//import com.spring.api.bithumb.vo.BithumbDataVo;
-//import com.spring.api.bithumb.vo.BithumbTransactionVo;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 
 import gmc.rd.report.api.upbit.dao.UpbitApiDao;
+import gmc.rd.report.api.upbit.vo.Deposit;
+import gmc.rd.report.api.upbit.vo.MarketAll;
 import gmc.rd.report.api.upbit.vo.OrderDetail;
 import gmc.rd.report.api.upbit.vo.Trades;
 import gmc.rd.report.api.upbit.vo.UpbitAccountDataVo;
 import gmc.rd.report.api.upbit.vo.UpbitAccountVo;
+import gmc.rd.report.api.upbit.vo.UpbitErrorVo;
 import gmc.rd.report.api.upbit.vo.UpbitTransactionVo;
+import gmc.rd.report.api.upbit.vo.Withdraws;
 
 @Service("UpbitApiService")
 public class UpbitApiServiceImpl implements UpbitApiService {
@@ -29,13 +34,16 @@ public class UpbitApiServiceImpl implements UpbitApiService {
 	static String serverUrl = "https://api.upbit.com";
 	static String result = "";
 	
+	String marketAll = "/v1/market/all?isDetails=false";
+	String candleStick = "/v1/candles/minutes";
 	String orderbook = "/v1/orderbook?markets=krw-";
 	String ticker = "/v1/ticker?markets=krw-";
 	String account = "/v1/accounts";
 	String balance = "/v1/orders/chance?";
 	String orderdetail = "/v1/order?";
 	String trade = "/v1/orders";
-	
+	String withdraws = "/v1/withdraws?";
+	String deposits = "/v1/deposits?";
 	@Autowired
 	UpbitApiDao upbitApiDao;
 	// 전체 계좌 조회
@@ -88,6 +96,15 @@ public class UpbitApiServiceImpl implements UpbitApiService {
 		
 		return upbitAccountVo;
 
+	}
+
+	@Override
+	public String getCandleStick(HashMap<String, String> hashMap) {
+
+		
+		result = upbitApiDao.publicHttp(hashMap, candleStick+"/60");
+
+		return result;
 	}
 	
 	@Override
@@ -145,9 +162,19 @@ public class UpbitApiServiceImpl implements UpbitApiService {
 	public List<Trades> getOrderDetail2(HashMap<String, String> hashMap) throws Exception {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("uuid", hashMap.get("uuid"));
+		
+		while (true) {
+			result = upbitApiDao.privateHttp(hashMap, params, orderdetail);
+			//System.out.println("orderDetail result 는 : " + result);
 
-		result = upbitApiDao.privateHttp(hashMap, params, orderdetail);
-		System.out.println("result 는 : " + result);
+			if (result.contains("Too many API requests.")) {
+				Thread.sleep(2000);
+				result = upbitApiDao.privateHttp(hashMap, params, orderdetail);
+				//System.out.println("result 는 : " + result);
+			} else {
+				break;
+			}
+		}
 		
 		List<Trades> trades = null;
 		
@@ -162,49 +189,97 @@ public class UpbitApiServiceImpl implements UpbitApiService {
 	// 주문리스트
 
 	@Override
-	public List<UpbitTransactionVo> getOrderList(HashMap<String, String> hashMap) throws Exception {
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("state", "done");
-		//params.put("kind", "watch");
 
-		String[] uuids = {
-				//"388d8ad5-4879-4efb-b7d7-f0223918bedb"
-		};
+	   public List<UpbitTransactionVo> getOrderList(HashMap<String, String> hashMap) throws Exception {
+	      HashMap<String, String> params = new HashMap<String, String>();
+	      params.put("state", hashMap.get("state"));
+	      params.put("page", hashMap.get("page"));
+	      //params.put("kind", "watch");
 
-		result = upbitApiDao.orderListHttp(hashMap, params, uuids);
-		System.out.println("cencel 로 넘긴것"+ result+" : 입니다.");
-		System.out.println("+++");
-		List<UpbitTransactionVo> transaction = null;
-		
-		try {
+	      String[] states = {
+//	            "done",
+//	            "cancel"
+	      };
+	   	  	
+			while (true) {
+				 result = upbitApiDao.orderListHttp(hashMap, params, states);
 
-			Gson gson = new Gson();
-			Type listType = new TypeToken<List<UpbitTransactionVo>>(){}.getType();
-			transaction = gson.fromJson(result, listType);
-			transaction.get(0).getState();
-			System.out.println("던이냐" + transaction.get(0).getState());
-			System.out.println("던의 아이디냐" + transaction.get(0).getUuid());
-			for (int j = 0; j < transaction.size(); j++) {
-				
-				System.out.println("던의 객채냐 : "+transaction.get(j).getSide() + 
-						", "+ transaction.get(j).getCreated_at() + 
-						", "+ transaction.get(j).getExecuted_volume() + 
-						", "+ transaction.get(j).getLocked() + 
-						", "+ transaction.get(j).getMarket() + 
-						", "+ transaction.get(j).getOrd_type() + 
-						", "+ transaction.get(j).getPaid_fee() + 
-						", "+ transaction.get(j).getPrice() + 
-						", "+ transaction.get(j).getState() + 
-						", "+ transaction.get(j).getVolume()  
-						
-						);
+				if (result.contains("Too many API requests.")) {
+					Thread.sleep(2000);
+					 result = upbitApiDao.orderListHttp(hashMap, params, states);
+					 
+					System.out.println("orderList result 는 : " + result);
+				} else {
+					break;
+				}
 			}
-		}catch(NullPointerException e) {
-	            e.printStackTrace();
-	        }
-		
-		return transaction;
-	}
+	      
+	      //System.out.println("+++");
+	      List<UpbitTransactionVo> transaction = null;
+	      
+	      
+	      try {
+
+	         Gson gson = new Gson();
+	         Type listType = new TypeToken<List<UpbitTransactionVo>>(){}.getType();
+	         transaction = gson.fromJson(result, listType);
+	         if(transaction.isEmpty()) {
+	            System.out.println("페이지 끝");
+	         }else {
+	            transaction.get(0).getState();
+	          //  System.out.println("던이냐" + transaction.get(0).getState());
+	          //  System.out.println("던의 아이디냐" + transaction.get(0).getUuid());
+	            for (int j = 0; j < transaction.size(); j++) {
+	               
+//	               System.out.println("던의 객채냐 : "+transaction.get(j).getSide() + 
+//	                     ", "+ transaction.get(j).getCreated_at() + 
+//	                     ", "+ transaction.get(j).getExecuted_volume() + 
+//	                     ", "+ transaction.get(j).getLocked() + 
+//	                     ", "+ transaction.get(j).getMarket() + 
+//	                     ", "+ transaction.get(j).getOrd_type() + 
+//	                     ", "+ transaction.get(j).getPaid_fee() + 
+//	                     ", "+ transaction.get(j).getPrice() + 
+//	                     ", "+ transaction.get(j).getState() + 
+//	                     ", "+ transaction.get(j).getVolume()  
+//	                     
+//	                     );
+	            }
+	         }
+	         
+	      }catch(NullPointerException e) {
+	               e.printStackTrace();
+	           }
+	      
+	      return transaction;
+	   }
+
+	@Override
+	   public String getOrderList2(HashMap<String, String> hashMap) throws Exception {
+	      HashMap<String, String> params = new HashMap<String, String>();
+	      params.put("state", hashMap.get("state"));
+	      params.put("page", hashMap.get("page"));
+	      //params.put("kind", "watch");
+
+	      String[] states = {
+//	            "done",
+//	            "cancel"
+	      };
+	   	  	
+			while (true) {
+				 result = upbitApiDao.orderListHttp(hashMap, params, states);
+
+				if (result.contains("Too many API requests.")) {
+					Thread.sleep(2000);
+					 result = upbitApiDao.orderListHttp(hashMap, params, states);
+					 
+					//System.out.println("orderList result 는 : " + result);
+				} else {
+					break;
+				}
+			}
+	      
+	      return result;
+	   }
 
 	// 주문삭제 - 주문번호 수정해야함
 
@@ -279,6 +354,147 @@ public class UpbitApiServiceImpl implements UpbitApiService {
 		result = upbitApiDao.tradeHttp(hashMap, params, trade);
 		
 		return result;
+	}
+
+	@Override
+	public String getWithdraws(HashMap<String, String> hashMap) throws Exception {
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("currency", hashMap.get("currency"));
+		params.put("page", hashMap.get("page"));
+		
+
+		while (true) {
+			result = upbitApiDao.withdrawHttp(hashMap, params);
+			
+			if (result.contains("Too many API requests.")) {
+				Thread.sleep(2000);
+				result = upbitApiDao.withdrawHttp(hashMap, params);
+				//System.out.println("result 는 : " + result);
+			} else {
+				break;
+			}
+
+		}
+		
+		
+//		if(result.equals("[]")) {
+//			return null;
+//		}else {
+//		System.out.println("withdraws 값" + result);
+//		Gson gson = new Gson();
+//		List<Withdraws> withdraws = null;
+//        Type listType = new TypeToken<List<Withdraws>>(){}.getType();
+//        withdraws = gson.fromJson(result, listType);
+//		return result;
+//		}
+		return result;
+	}
+	
+	@Override
+	public Withdraws getWithdrawsError(HashMap<String, String> hashMap) throws Exception {
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("currency", hashMap.get("currency"));
+		params.put("page", hashMap.get("page"));
+		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode jsonNode;
+		
+		Withdraws withdrawsVo = new Withdraws();
+		
+
+		result = upbitApiDao.withdrawHttp(hashMap, params);
+
+		jsonNode = mapper.readTree(result);
+
+		if (jsonNode.get("error") != null) {
+			Gson gson = new Gson();
+			withdrawsVo = gson.fromJson(result, Withdraws.class);
+			//System.out.println(withdrawsVo);
+		}
+
+		return withdrawsVo;
+	}
+
+	@Override
+	public String getDeposits(HashMap<String, String> hashMap) throws Exception {
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("currency", hashMap.get("currency"));
+		params.put("page", hashMap.get("page"));
+		while (true) {
+			result = upbitApiDao.depositHttp(hashMap, params);
+
+			if (result.contains("Too many API requests.")) {
+				Thread.sleep(2000);
+				result = upbitApiDao.depositHttp(hashMap, params);
+				//System.out.println("result 는 : " + result);
+			} else {
+				break;
+			}
+		}
+
+//		if(result.equals("[]")) {
+//			return null;
+//		}else {
+//			System.out.println("deposits 값" + result);
+//			Gson gson = new Gson();
+//			List<Deposit> deposit = null;
+//	        Type listType = new TypeToken<List<Deposit>>(){}.getType();
+//	        deposit = gson.fromJson(result, listType);
+//			return deposit;
+//		}
+		return result;
+	}
+	
+	@Override
+	public Deposit getDepositsError(HashMap<String, String> hashMap) throws Exception {
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("currency", hashMap.get("currency"));
+		params.put("page", hashMap.get("page"));
+
+		result = upbitApiDao.depositHttp(hashMap, params);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode jsonNode;
+		
+		jsonNode = mapper.readTree(result);
+		
+		Deposit depositVo = new Deposit();
+		
+		if (jsonNode.get("error") != null) {
+			Gson gson = new Gson();
+			depositVo = gson.fromJson(result, Deposit.class);
+			//System.out.println(withdrawsVo);
+		}
+
+		return depositVo;
+	}
+	
+	@Override
+	public List<MarketAll> getMarketAll() {
+		result = upbitApiDao.publicHttp2(marketAll);
+		//System.out.println("마켓올에 대한 결과값 : "+result);
+		
+		Gson gson = new Gson();
+		List<MarketAll> marketAll = null;
+        Type listType = new TypeToken<List<MarketAll>>(){}.getType();
+        marketAll = gson.fromJson(result, listType);
+		
+		for (int i = 0; i < marketAll.size(); i++) {
+			if(marketAll.get(i).getMarket().contains("KRW-")) {
+			marketAll.get(i).setMarket(marketAll.get(i).getMarket().replace("KRW-",""));
+			}else if(marketAll.get(i).getMarket().contains("USDT-")) {
+				marketAll.get(i).setMarket(marketAll.get(i).getMarket().replace("USDT-",""));
+				marketAll.remove(i);
+				i--;
+			}else if(marketAll.get(i).getMarket().contains("BTC-")) {
+				marketAll.get(i).setMarket(marketAll.get(i).getMarket().replace("BTC-",""));
+				marketAll.remove(i);
+				i--;
+			}
+		}
+        
+		//System.out.println("withdraws.get(0).getCurrency() : "+marketAll.get(0).getMarket());
+		return marketAll;
 	}
 
 }

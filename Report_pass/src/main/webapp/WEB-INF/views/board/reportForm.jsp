@@ -48,8 +48,9 @@
         <th>평균매수가</th>
         <th>수수료</th>
         <th>거래금액</th>
-        <th>매도수익률</th>
-        <th>청산수익률</th>
+        <th>누적 수익 금액</th>
+        <th>개별 수익 금액</th>
+        <th>수익률</th>
         <th>일지</th>
         <th>상세작성</th>
       </tr>
@@ -76,8 +77,10 @@
         <td style="text-align:right;">${trades.avgPrice}</td>
         <td style="text-align:right;">${trades.fee}</td>
         <td style="text-align:right;">${trades.totalPrice}</td>
+        <td style="text-align:right;">${trades.incomeCal}</td> <!-- 누적 수익 금액 -->
+        <td style="text-align:right;">${trades.income}</td> <!-- 개별 수익 금액 -->
         <td style="text-align:right;">${trades.revenue}</td>
-        <td style="text-align:right;">${trades.clearRevenue}</td>
+     
         <td><input type="text" id ="logId${trades.orderId}" value="${trades.log}" placeholder="${trades.log}" style="width:70%"><input type="button" onclick="updateLog('${trades.orderId}")"id="btn-save-log"  class="btn "  value= "저장" style="width:20%;font-size:13px;"/></td>
 		<c:set value = "${boardsInit}" var="boardsInit"></c:set>
 
@@ -99,8 +102,8 @@
 </html>
 <script >
 </script>
-<script src="/js/reportForm.js" ></script>
-<script src="/js/selectBox.js" ></script>
+<script src="<%=request.getContextPath()%>/js/reportForm.js" ></script>
+<script src="<%=request.getContextPath()%>/js/selectBox.js" ></script>
 <%@ include file="../layout/footer.jsp"%>
 
 

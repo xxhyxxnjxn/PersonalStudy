@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 80
   servlet:
     context-path: /
     encoding:
@@ -11,7 +11,8 @@ spring:
   mvc:
     view:
       prefix: /WEB-INF/views/
-      suffix: .jsp
+      suffix: .jsp    static-path-pattern: /static/**
+
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

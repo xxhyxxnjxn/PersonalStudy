@@ -1,5 +1,6 @@
 package gmc.rd.report.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 //기본적인 crud함수를 다들고있음
 	//SELECT * FROM user WHERE username=1?;
 	Optional<User> findByMemId(String memId);
+
+	@Query(value = "select * from user where memId = :memId ", nativeQuery = true)
+	User findByMemId1(String memId);
 
 }
 //JPA Naming 전략

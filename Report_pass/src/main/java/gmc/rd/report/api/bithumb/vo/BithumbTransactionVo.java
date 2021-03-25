@@ -28,7 +28,6 @@ public class BithumbTransactionVo {
 	@JsonProperty(value="price")
 	private String price;
 	
-	@JsonProperty(value="totalPrice")
 	private String amount;
 	
 	private String fee_currency;
@@ -36,7 +35,6 @@ public class BithumbTransactionVo {
 	@JsonProperty(value="fee")
 	private String fee;
 	
-	@JsonProperty(value="accUnits")
 	private String order_balance;
 	
 	private String payment_balance;

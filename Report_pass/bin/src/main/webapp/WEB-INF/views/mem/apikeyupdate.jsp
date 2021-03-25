@@ -18,7 +18,7 @@
 		</div>
 </div>
 
-<script src="/js/apiAuth.js"></script>
+<script src="/static/js/apiAuth.js"></script>
 
 <%@ include file="../layout/footer.jsp"%>
 </body>

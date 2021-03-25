@@ -2,12 +2,13 @@ package gmc.rd.report.dto;
 
 import java.sql.Timestamp;
 
+import gmc.rd.report.entity.User;
 import lombok.Data;
 
 @Data
 public class ReportDto3 {
 	private int idx;	
-	private String memId;
+	private User user;
 	private String site;
 	private String orderId;
 	private String transactionDate;
@@ -24,5 +25,22 @@ public class ReportDto3 {
 	private String file;
 	private String accUnits;
 	
-
+	private String bidUnitsCal;
+	private String askUnitsCal;
+	
+	private String bidAvgPrice;
+	private String askAvgPrice;
+	
+	private String bidTotalPriceCal;
+	private String askTotalPriceCal;
+	
+	private String bidAccUnits;
+	private String askAccUnits;
+	
+	private String totalRate;
+	private String totalRateCal;
+	private String expectIncome;
+	private String incomeCal;
+	private String income;
+	private String cal;
 }

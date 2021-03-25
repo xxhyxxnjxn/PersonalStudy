@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "api_tbl")
 public class Api {
+	
 	@Id // primary key
 	@GeneratedValue (strategy = GenerationType.IDENTITY)// 프로젝트에서 연결된 DB 의 넘버링 전략을 따라간다.
 	private int idx;

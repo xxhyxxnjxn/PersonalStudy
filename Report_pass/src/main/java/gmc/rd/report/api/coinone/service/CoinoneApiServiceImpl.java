@@ -1,11 +1,13 @@
 package gmc.rd.report.api.coinone.service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,14 +17,25 @@ import gmc.rd.report.api.coinone.dao.Encryptor;
 import gmc.rd.report.api.coinone.dao.HTTPUtil;
 import gmc.rd.report.api.coinone.service.CoinoneApiService;
 import gmc.rd.report.api.coinone.vo.CoinoneBalanceVo;
+import gmc.rd.report.api.coinone.vo.CoinoneCoinTransactionsDataVo;
+import gmc.rd.report.api.coinone.vo.CoinoneCoinTransactionsHistoryVo;
 import gmc.rd.report.api.coinone.vo.CoinoneCompleteOrdersVo;
 import gmc.rd.report.api.coinone.vo.CoinoneTransactionVo;
 import gmc.rd.report.api.upbit.vo.UpbitAccountVo;
+import gmc.rd.report.repository.ApiRoadingStateRepository;
+import gmc.rd.report.repository.BankStateMentStateRepository;
+import gmc.rd.report.repository.CandleStickStateRepository;
 
 @Service("coinoneApiService")
 public class CoinoneApiServiceImpl implements CoinoneApiService{
 	
 	
+	@Autowired
+	private ApiRoadingStateRepository apiRoadingRepository;
+	@Autowired
+	private BankStateMentStateRepository bankStateMentStateRepository;
+	@Autowired
+	private CandleStickStateRepository candleStickStateRepository;
 	
 	String api_url = "https://api.coinone.co.kr/";
 	String orderbook = "orderbook?currency=";
@@ -337,61 +350,101 @@ public class CoinoneApiServiceImpl implements CoinoneApiService{
 	}
 	
 	
-	
 	@Override
 	public List<CoinoneTransactionVo> MyCompletedOrders2(HashMap<String, String> hashMap) throws Exception {
-		// TODO Auto-generated method stub    v2/order/complete_orders/
-		long nonce = (long) System.currentTimeMillis()*1000;
+		// TODO Auto-generated method stub v2/order/complete_orders/
+		long nonce = (long) System.currentTimeMillis() * 1000;
 		String API_URL = "https://api.coinone.co.kr/";
 		Map<String, String> apikey = new HashMap<>();
-		
+
 		String accessToken = hashMap.get("apiKey");
-		
-//        System.out.println("MyLimitOrders : "+nonce);
-		
+
 		apikey.put("nonce", String.valueOf(nonce));
-		
+
 		String url = API_URL + "v2/order/complete_orders/";
 		JSONObject params = new JSONObject();
 		params.put("nonce", nonce);
 		params.put("access_token", accessToken);
 		params.put("currency", hashMap.get("currency"));
-		
-		
+
 		String payload = Base64.encodeBase64String(params.toString().getBytes());
 		String signature = Encryptor.getHmacSha512(hashMap.get("secretKey").toUpperCase(), payload).toLowerCase();
-		
+
 		Map<String, String> map = new HashMap<>();
 		map.put("content-type", "application/json");
 		map.put("accept", "application/json");
 		map.put("X-COINONE-PAYLOAD", payload);
 		map.put("X-COINONE-SIGNATURE", signature);
-		
+
 		JSONObject result = HTTPUtil.getJSONfromPost(url, map, payload);
-		
-		System.out.println(result);
-		//System.out.println(result);
-//        System.out.println("limitBuy");
-//        System.out.println(result);
-		//String strBalance = (String)((JSONObject) result.get(coin)).get("avail");
 		List<CoinoneTransactionVo> transaction = null;
+		System.out.println(result);
 		try {
-			
+
 			Gson gson = new Gson();
-			CoinoneCompleteOrdersVo coinoneTransactionVo = gson.fromJson(result.toString(), CoinoneCompleteOrdersVo.class);
-			
-			if(coinoneTransactionVo.getResult().equals("error")) {
+			CoinoneCompleteOrdersVo coinoneTransactionVo = gson.fromJson(result.toString(),
+					CoinoneCompleteOrdersVo.class);
+
+			if (coinoneTransactionVo.getResult().equals("error")) {
 				System.out.println("");
-			}else{
+			} else {
 				transaction = coinoneTransactionVo.getCompleteOrders();
 			}
-			
 
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
-		
+
 		return transaction;
+	}
+	
+	@Override
+	public List<CoinoneCoinTransactionsDataVo> coinTransacionHistory(HashMap<String, String> hashMap) throws Exception {
+		// TODO Auto-generated method stub    v2/order/complete_orders/
+				long nonce = (long) System.currentTimeMillis()*1000;
+				String API_URL = "https://api.coinone.co.kr";
+				Map<String, String> apikey = new HashMap<>();
+				
+				String accessToken = hashMap.get("apiKey");
+
+				apikey.put("nonce", String.valueOf(nonce));
+				
+				String url = API_URL + "/v2/transaction/history/";
+				JSONObject params = new JSONObject();
+				params.put("nonce", nonce);
+				params.put("access_token", accessToken);
+				params.put("currency", hashMap.get("currency").toLowerCase());
+				
+				
+				String payload = Base64.encodeBase64String(params.toString().getBytes());
+				String signature = Encryptor.getHmacSha512(hashMap.get("secretKey").toUpperCase(), payload).toLowerCase();
+				
+				Map<String, String> map = new HashMap<>();
+				map.put("content-type", "application/json");
+				map.put("accept", "application/json");
+				map.put("X-COINONE-PAYLOAD", payload);
+				map.put("X-COINONE-SIGNATURE", signature);
+				
+				JSONObject result = HTTPUtil.getJSONfromPost(url, map, payload);
+				List<CoinoneCoinTransactionsDataVo> transaction = null;
+				System.out.println(result);
+				try {
+
+					Gson gson = new Gson();
+					CoinoneCoinTransactionsHistoryVo coinoneCoinTransactionsHistoryVo = gson.fromJson(result.toString(), CoinoneCoinTransactionsHistoryVo.class);
+					
+					if(coinoneCoinTransactionsHistoryVo.getResult().equals("error")) {
+						System.out.println("");
+					}else{
+						transaction = coinoneCoinTransactionsHistoryVo.getTransactions();
+					}
+					
+
+				} catch (NullPointerException e) {
+					e.printStackTrace();
+				}
+				
+				return transaction;
 	}
 	
 	

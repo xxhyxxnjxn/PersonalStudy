@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import gmc.rd.report.api.bithumb.dao.Api_Client;
+import gmc.rd.report.api.bithumb.service.BithumbApiService;
 import gmc.rd.report.api.bithumb.vo.BithumbBalanceVo;
 import gmc.rd.report.api.bithumb.vo.BithumbDataVo;
 import gmc.rd.report.api.bithumb.vo.BithumbTransactionVo;
@@ -160,6 +161,19 @@ public class BithumbApiServiceImpl implements BithumbApiService{
 	}
 	
 	@Override
+	public String getOrders(String apiKey,String secretKey,String orderCurrency) {
+		Api_Client api = new Api_Client(apiKey,secretKey);
+		
+		rgParams.put("order_currency",orderCurrency);
+		rgParams.put("payment_currency", "KRW");
+
+		String result = api.callApi(orders, rgParams);
+		System.out.println(result);
+		
+		return result;
+	}
+	
+	@Override
 	public String getOrderDetail(HashMap<String,String> hash) {
 		Api_Client api = new Api_Client(hash.get("apiKey"),hash.get("secretKey"));
 		
@@ -183,12 +197,10 @@ public class BithumbApiServiceImpl implements BithumbApiService{
 	}
 	
 	@Override
-	public List<BithumbTransactionVo> getUserTransaction(String apiKey,String secretKey,String orderCurrency) {
+	public List<BithumbTransactionVo> getUserTransaction(String apiKey,String secretKey,String orderCurrency,String offSet) {
 		Api_Client api = new Api_Client(apiKey,secretKey);
 		
-		
-		
-		rgParams.put("offset", "0");
+		rgParams.put("offset", offSet);
 		rgParams.put("count", "50");
 		rgParams.put("searchGb", "0");
 		rgParams.put("order_currency", orderCurrency);
@@ -197,7 +209,7 @@ public class BithumbApiServiceImpl implements BithumbApiService{
 		List<BithumbTransactionVo> transaction = null;
 		
 		String result = api.callApi(transactions, rgParams);
-
+		System.out.println("빗섬 에이피아이에 있는 result : "+result);
 		
 		try {
 
@@ -227,6 +239,24 @@ public class BithumbApiServiceImpl implements BithumbApiService{
 
 		return transaction;
 	}
+	
+	
+	@Override
+	public String getCandleStick(String currency,String candleType) {
+		Api_Client api = new Api_Client("","");
+		
+		String result="";
+		
+		try {
+			result = api.callApi2("/public/candlestick/"+currency+"_KRW/"+candleType, rgParams);
+			
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	
 	@Override
 	public JsonNode getKakaoAccessToken(String code) {

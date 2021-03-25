@@ -16,7 +16,7 @@ public interface ApiService {
 
 	ApiDto selectApiKey(ApiDto apiDto);
 
-	String authApikey(ApiDto apiDto);
+	String authApikey(ApiDto apiDto)throws Exception;
 
 	void updateApiKey(ApiDto apiDto);
 

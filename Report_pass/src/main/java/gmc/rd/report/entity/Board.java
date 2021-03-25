@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 public class Board {
-	
+	@Column(nullable = false, length=100)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)//auto_increment
 	private int id;
 	

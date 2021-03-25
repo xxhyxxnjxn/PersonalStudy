@@ -10,18 +10,50 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>gmc.rd.report</groupId>
-	<artifactId>gmcReport</artifactId>
+	<artifactId>Report_pass</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Report</name>
+	<packaging>war</packaging>
+	<name>Report_pass</name>
 	<description>My First Blog Project</description>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
+		<poi.version>4.1.2</poi.version>
 	</properties>
-
 	<dependencies>
+
+	<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+
+		<!-- etc as needed -->
+
+		<!-- marked the embedded servlet container as provided -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- 추가 라이브러리 시작 -->
+		
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-scratchpad</artifactId>
+			<version>4.1.2</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>4.1.2</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<version>4.1.2</version>
+			<type>jar</type>
+		</dependency>
 		<!-- 시큐리티 태그 라이브러리 -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -67,7 +99,18 @@
 			<optional>true</optional>
 			<!-- <scope>runtime</scope> <optional>true</optional> -->
 		</dependency>
+		<!-- excel 추가 -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>4.1.2</version>
+		</dependency>
 
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -144,7 +187,11 @@
 			<artifactId>mapstruct</artifactId>
 			<version>1.4.1.Final</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -24,5 +24,23 @@ public class ReportDto {
 	private String file;
 	private String accUnits;
 	
-
+	private String bidUnitsCal;
+	private String askUnitsCal;
+	
+	private String bidAvgPrice;
+	private String askAvgPrice;
+	
+	private String bidTotalPriceCal;
+	private String askTotalPriceCal;
+	
+	private String bidAccUnits;
+	private String askAccUnits;
+	
+	private String totalRate;
+	private String totalRateCal;
+	private String expectIncome;
+	private String incomeCal;
+	private String income;
+	private String cal;
+	
 }

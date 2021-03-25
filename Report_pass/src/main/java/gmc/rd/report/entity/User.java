@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -27,10 +28,11 @@ import lombok.NoArgsConstructor;
 @Builder//빌더 패턴!!
 public class User {
 	
-	@GeneratedValue(strategy = GenerationType.IDENTITY)//프로젝트에서 연결된 DB의 넘버링 전략을 따라간다.
+	@Column(nullable=false, length=30)// 아이디
 	private int idx;   //시퀀스, auto_increment
+	
 	@Id  //primaryKey
-	@Column(nullable=false, length=30,unique=true) // 아이디
+	@Column(nullable=false, length=30, name="memId") // 아이디
 	private String memId;
 	@Column(nullable=false, length=100)  // 비밀번호를 해쉬로 변경해서 암호화해야하므로 넉넉
 	private String password;
